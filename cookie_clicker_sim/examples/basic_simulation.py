@@ -213,17 +213,94 @@ def event_callback_demo():
     print("模拟完成\n")
 
 
+def visualization_demo():
+    """可视化演示"""
+    print("\n=== 可视化演示 ===")
+
+    try:
+        from cookie_clicker_sim.analysis.visualizer import DataVisualizer
+        import matplotlib.pyplot as plt
+
+        # 创建模拟器和可视化器
+        simulator = GameSimulator()
+        visualizer = DataVisualizer()
+
+        # 数据收集
+        time_data = []
+        cookies_data = []
+        cps_data = []
+
+        simulator.game_state.cookies = 3000
+
+        print("收集30分钟的游戏数据...")
+        for minute in range(31):
+            time_data.append(simulator.game_state.game_time)
+            cookies_data.append(simulator.game_state.cookies)
+            cps_data.append(simulator.game_state.cookies_per_second)
+
+            if minute < 30:
+                simulator.simulate_step(60)  # 1分钟
+
+        # 绘制进度曲线
+        fig1 = visualizer.plot_progress_curve(
+            time_data, cookies_data, cps_data,
+            "Cookie Clicker 30分钟进度曲线"
+        )
+
+        # 绘制建筑物分布
+        fig2 = visualizer.plot_building_distribution(
+            simulator.game_state.buildings,
+            "最终建筑物分布"
+        )
+
+        # 绘制CPS分解
+        cps_breakdown = simulator.get_cps_breakdown()
+        fig3 = visualizer.plot_cps_breakdown(
+            cps_breakdown,
+            "CPS来源分析"
+        )
+
+        # 保存图表
+        import os
+        os.makedirs("demo_charts", exist_ok=True)
+        visualizer.save_figure(fig1, "demo_charts/progress_curve.png")
+        visualizer.save_figure(fig2, "demo_charts/building_distribution.png")
+        visualizer.save_figure(fig3, "demo_charts/cps_breakdown.png")
+
+        print("✓ 可视化演示完成，图表已保存到 demo_charts/ 目录")
+        print(f"  最终饼干: {cookies_data[-1]:.0f}")
+        print(f"  最终CPS: {cps_data[-1]:.1f}")
+        print(f"  建筑物总数: {sum(simulator.game_state.buildings.values())}")
+
+        # 关闭图表
+        plt.close('all')
+
+    except ImportError:
+        print("可视化功能需要安装: pip install matplotlib seaborn pandas numpy")
+    except Exception as e:
+        print(f"可视化演示失败: {e}")
+
+
 if __name__ == "__main__":
     # 运行所有演示
     basic_simulation_demo()
     strategy_comparison_demo()
     prestige_analysis_demo()
     event_callback_demo()
-    
-    print("=== 演示完成 ===")
+    visualization_demo()
+
+    print("\n=== 演示完成 ===")
     print("你可以使用这个模拟器来:")
     print("1. 测试不同的购买策略")
     print("2. 分析最优重生时机")
     print("3. 预测游戏进度")
     print("4. 优化建筑物配比")
     print("5. 研究升级效果")
+    print("6. 📊 生成数据可视化图表")
+    print("\n图表功能:")
+    print("📈 进度曲线 - 饼干和CPS随时间变化")
+    print("🥧 建筑物分布 - 各建筑物数量占比")
+    print("📊 CPS分解 - 各来源CPS贡献")
+    print("📉 效率对比 - 购买选项效率排序")
+    print("🔄 策略对比 - 不同策略效果对比")
+    print("⭐ 声望分析 - 声望与饼干关系")
